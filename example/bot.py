@@ -1,3 +1,10 @@
+# Hello,
+# When I started this project, only God and I knew how it work.
+# But now only God know
+#
+# So, if you want to countinue develop but you find a bug  pls increase number of variable below for warning a next one.
+# total_hours_wasted_here=1
+
 # bot.py
 import os
 import random

@@ -15,7 +15,7 @@
             "name": "PIF_BOT /w Server",
             "type": "python",
             "request": "launch",
-            "program": "run.py",
+            "program": "./src/run.py",
             "console": "integratedTerminal"
         }
     ]
