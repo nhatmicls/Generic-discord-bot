@@ -1,28 +1,49 @@
-FROM ubuntu:20.04
-WORKDIR /discord_bot
+FROM ubuntu:20.04 as main
 
-# Install python3.9
+WORKDIR /pif
+
+# ADD repositories /etc/apk/repositories
+
+#Install python 3
+# RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get update 
+RUN apt-get install -y python3.9
+RUN apt install -y python3-pip
+RUN apt install -y build-essential libssl-dev libffi-dev python3-dev
+
+#Install other platform requirement
+RUN apt install -y ffmpeg libcairo2-dev libgirepository1.0-dev libdbus-glib-1-dev
+
+# Install utility
+RUN apt-get update && \
+    apt-get install -y pkg-config &&\
+    pip install -U setuptools wheel
+
+RUN pip install opencv-python==4.7.0.68
+
+FROM main as dev
+
+# Install utility
 RUN apt update && \
-    apt -y install software-properties-common && \
-    add-apt-repository ppa:deadsnakes/ppa && \
-    apt update && \
-    apt -y install python3.9
-
-# Set default python3.9
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1 && \
-    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
-
-# Install ssh, git, pip, venv, sshpass, nano
-RUN apt update && \
-    apt-get -y install git openssh-client python3-pip python3.9-dev python3.9-venv sshpass openssh-server nano tmux &&\
     pip install -U black
 
-# Install ping
-RUN apt-get update && apt-get install -y iputils-ping
+ADD ./requirements.txt /pif/bot-playground/
 
-# Create virtual environments
-ADD ./requirements.txt /discord_bot/
-RUN python3 -m venv /discord_bot/vir_env
-RUN . /discord_bot/vir_env/bin/activate && pip3 install -r /discord_bot/requirements.txt
+# Download and install pip package
+RUN pip install --upgrade pip
+RUN pip install -r /pif/bot-playground/requirements.txt
 
-WORKDIR /discord_bot/PIF_discord_bot
+WORKDIR /pif/bot-playground
+
+FROM main as prod
+ADD ./requirements.txt /pif/bot-playground/
+
+# Download and install pip package
+RUN pip install --upgrade pip
+RUN pip install -r /pif/bot-playground/requirements.txt
+
+#Copy file
+ADD ./ /pif/bot-playground/
+
+WORKDIR /pif/bot-playground
+ENTRYPOINT python3 -u bot.py
